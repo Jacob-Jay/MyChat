@@ -2,34 +2,58 @@ package com.jq.netty;
 
 import com.jq.netty.handler.MessageHandler;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 /**
+ *
+ * init and start netty serverBootstrap
  * @author Jiangqing
  * @version 1.0
  * @since 2020/1/14 21:49
  */
+
 public class Server {
 
+
     private int port = 8899;
+    private ServerBootstrap serverBootstrap;
+    private EventLoopGroup boss;
+    private EventLoopGroup worker;
 
-    ClientHolder clientHolder = new DefaultClientHolder();
+    private boolean start = false;
+    private static Server server;
+
+    private ClientHolder clientHolder = new DefaultClientHolder();
 
 
-    public void init() {
-        EventLoopGroup boss = new NioEventLoopGroup();
-        EventLoopGroup worker = new NioEventLoopGroup();
+
+    public static Server getInstance(int port) {
+        if (server == null) {
+            synchronized (Server.class) {
+                if (server == null) {
+                    server = new Server(port);
+                }
+            }
+        }
+        return server;
+    }
+
+    private Server(int port) {
+        if (port != 0) {
+            this.port = port;
+        }
+        init();
+    }
 
 
-        try {
-            ServerBootstrap server = new ServerBootstrap();
-            server.group(boss,worker)
+    private void init() {
+         boss = new NioEventLoopGroup();
+         worker = new NioEventLoopGroup();
+            serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(boss,worker)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
@@ -37,18 +61,42 @@ public class Server {
                         }
                     }).channel(NioServerSocketChannel.class);
 
-            ChannelFuture bindFuture = server.bind(port).sync();
+
+
+    }
+
+    /**
+     * start server
+     */
+    public void start() {
+
+        if (start) {
+            return;
+        }
+        try {
+            ChannelFuture bindFuture = serverBootstrap.bind(port).sync().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                    if (channelFuture.isSuccess()) {
+                        start = true;
+                    }
+                }
+            });
             bindFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } finally {
-            boss.shutdownGracefully();
-            worker.shutdownGracefully();
         }
     }
 
-    public static void main(String[] args) {
-        new Server().init();
+    /**
+     * stop server
+     */
+    public void stop() {
+        boss.shutdownGracefully();
+        worker.shutdownGracefully();
     }
+
+
+
 
 }

@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultClientHolder implements ClientHolder {
 
     /**
-     * save the client connect to server
+     * save the client connect to serverBootstrap
      * the key is client's address
      * the channel represent a client
      */
