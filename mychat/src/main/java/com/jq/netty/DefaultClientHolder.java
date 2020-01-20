@@ -30,15 +30,30 @@ public class DefaultClientHolder implements ClientHolder {
 
 
     public void add(Channel channel) throws ClientRepeatException {
-        InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
-        String hostName = socketAddress.getHostName();
-        if (clients.containsKey(hostName)) {
+        String clientKey = getClientKey(channel);
+        if (clients.containsKey(clientKey)) {
             throw new ClientRepeatException();
         }
-        clients.put(hostName, channel);
+        clients.put(clientKey, channel);
+    }
+
+    /**
+     * get client key build up by ip+port
+     * @param channel
+     * @return
+     */
+    private String getClientKey(Channel channel) {
+        InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
+        String hostName = socketAddress.getHostName();
+        int port = socketAddress.getPort();
+        return hostName + port;
     }
 
     public void remove(Channel channel) {
-
+        String clientKey = getClientKey(channel);
+        if (clients.contains(clientKey)) {
+            clients.remove(clientKey);
+            heartTime.remove(clientKey);
+        }
     }
 }

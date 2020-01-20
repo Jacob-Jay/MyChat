@@ -1,6 +1,7 @@
 package com.jq.netty;
 
-import com.jq.netty.handler.MessageHandler;
+import com.jq.protocol.marshaller.MarDecoder;
+import com.jq.protocol.marshaller.MarEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -57,7 +58,9 @@ public class Server {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new MessageHandler(clientHolder));
+                            pipeline.addLast(new MarEncoder());
+                            pipeline.addLast(new MarDecoder(1024*1024*10));
+                            pipeline.addLast(new NettyInHandler(clientHolder));
                         }
                     }).channel(NioServerSocketChannel.class);
 

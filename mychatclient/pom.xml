@@ -5,21 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.jq</groupId>
-    <artifactId>mychat-dto</artifactId>
+    <artifactId>mychatclient</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-
     <dependencies>
-        <dependency>
-            <groupId>org.jboss.marshalling</groupId>
-            <artifactId>jboss-marshalling</artifactId>
-            <version>1.4.10.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.marshalling</groupId>
-            <artifactId>jboss-marshalling-serial</artifactId>
-            <version>1.4.11.Final</version>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -31,11 +20,13 @@
             <version>4.1.42.Final</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>com.jq</groupId>
+            <artifactId>mychat-dto</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
+
+
     <build>
         <plugins>
             <plugin>
@@ -47,19 +38,7 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
+
 </project>
