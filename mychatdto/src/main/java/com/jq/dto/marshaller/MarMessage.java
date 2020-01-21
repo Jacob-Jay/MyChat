@@ -24,4 +24,8 @@ public class MarMessage {
      */
     private Object body;
 
+
+
+
+
 }

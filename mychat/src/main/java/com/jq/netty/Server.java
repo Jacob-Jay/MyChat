@@ -1,5 +1,6 @@
 package com.jq.netty;
 
+import com.jq.netty.handler.HandlerPool;
 import com.jq.protocol.marshaller.MarDecoder;
 import com.jq.protocol.marshaller.MarEncoder;
 import io.netty.bootstrap.ServerBootstrap;
@@ -7,6 +8,12 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -15,19 +22,37 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  * @version 1.0
  * @since 2020/1/14 21:49
  */
+@Component
+@PropertySource("classpath:/netty.properties")
+public class Server implements InitializingBean,DisposableBean {
 
-public class Server {
+    @Value("${server.port}")
+    private int port;
 
 
-    private int port = 8899;
     private ServerBootstrap serverBootstrap;
     private EventLoopGroup boss;
     private EventLoopGroup worker;
 
+
+
+
     private boolean start = false;
     private static Server server;
 
-    private ClientHolder clientHolder = new DefaultClientHolder();
+    @Autowired
+    private HandlerPool handlerPool;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        server = Server.getInstance(port);
+        server.start();
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        server.stop();
+    }
 
 
 
@@ -35,16 +60,16 @@ public class Server {
         if (server == null) {
             synchronized (Server.class) {
                 if (server == null) {
-                    server = new Server(port);
+                    server = new Server();
                 }
             }
         }
         return server;
     }
 
-    private Server(int port) {
-        if (port != 0) {
-            this.port = port;
+    private Server( ) {
+        if (port == 0) {
+            port = 8899;
         }
         init();
     }
@@ -60,7 +85,7 @@ public class Server {
                             ChannelPipeline pipeline = ch.pipeline();
                             pipeline.addLast(new MarEncoder());
                             pipeline.addLast(new MarDecoder(1024*1024*10));
-                            pipeline.addLast(new NettyInHandler(clientHolder));
+                            pipeline.addLast(new NettyInHandler(handlerPool));
                         }
                     }).channel(NioServerSocketChannel.class);
 
@@ -71,7 +96,7 @@ public class Server {
     /**
      * start server
      */
-    public void start() {
+    private void start() {
 
         if (start) {
             return;
@@ -94,7 +119,7 @@ public class Server {
     /**
      * stop server
      */
-    public void stop() {
+    private void stop() {
         boss.shutdownGracefully();
         worker.shutdownGracefully();
     }

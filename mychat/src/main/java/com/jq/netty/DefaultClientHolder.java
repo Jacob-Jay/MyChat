@@ -2,6 +2,7 @@ package com.jq.netty;
 
 import com.jq.exception.ClientRepeatException;
 import io.netty.channel.Channel;
+import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 1.0
  * @since 2020/1/14 22:21
  */
+@Component
 public class DefaultClientHolder implements ClientHolder {
 
     /**
@@ -29,7 +31,8 @@ public class DefaultClientHolder implements ClientHolder {
     private ConcurrentHashMap<String,Long>heartTime = new ConcurrentHashMap<String, Long>();
 
 
-    public void add(Channel channel) throws ClientRepeatException {
+    public void add(WrapMessage wrapMessage) throws ClientRepeatException {
+        Channel channel = wrapMessage.getCtx().channel();
         String clientKey = getClientKey(channel);
         if (clients.containsKey(clientKey)) {
             throw new ClientRepeatException();
@@ -49,7 +52,8 @@ public class DefaultClientHolder implements ClientHolder {
         return hostName + port;
     }
 
-    public void remove(Channel channel) {
+    public void remove(WrapMessage wrapMessage) {
+        Channel channel = wrapMessage.getCtx().channel();
         String clientKey = getClientKey(channel);
         if (clients.contains(clientKey)) {
             clients.remove(clientKey);

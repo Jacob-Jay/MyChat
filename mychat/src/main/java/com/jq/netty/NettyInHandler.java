@@ -1,8 +1,7 @@
 package com.jq.netty;
 
+import com.jq.dto.MessageConstant;
 import com.jq.dto.marshaller.MarMessage;
-import com.jq.exception.ClientRepeatException;
-import com.jq.netty.ClientHolder;
 import com.jq.netty.handler.HandlerPool;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -14,45 +13,33 @@ import io.netty.channel.SimpleChannelInboundHandler;
  */
 public class NettyInHandler extends SimpleChannelInboundHandler<MarMessage> {
 
-    private ClientHolder clientHolder;
-    private HandlerPool handlerPool = new HandlerPool();
 
-    public NettyInHandler(ClientHolder clientHolder) {
-        this.clientHolder = clientHolder;
+    private final HandlerPool handlerPool;
+
+    NettyInHandler(HandlerPool handlerPool) {
+        this.handlerPool = handlerPool;
     }
 
     protected void channelRead0(ChannelHandlerContext ctx, MarMessage msg) throws Exception {
-        handlerPool.add(new TaskNode(ctx,msg));
-    }
-
-    @Override
-    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        super.channelRegistered(ctx);
-        System.out.println("reg");
-    }
-
-    @Override
-    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        super.channelUnregistered(ctx);
-        System.out.println("unreg");
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-        System.out.println("active");
-        try {
-            clientHolder.add(ctx.channel());
-        } catch (ClientRepeatException e) {
-            e.printStackTrace();
-            ctx.close();
+        WrapMessage wrapMessage = new WrapMessage(ctx, msg);
+        Integer action = msg.getHead().getAction();
+        if (action.equals(MessageConstant.ACTION_SEND_MSG)) {
+            handlerPool.addMessage(wrapMessage);
+        } else{
+            handlerPool.addLoginOrOut(wrapMessage);
         }
     }
 
+
+
+    /**
+     * 客户端通道关闭时，清除客户端信息缓存
+     * @param ctx
+     * @throws Exception
+     */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        super.channelInactive(ctx);
-        System.out.println("inactive");
-        clientHolder.remove(ctx.channel());
+        WrapMessage wrapMessage = new WrapMessage(ctx, null);
+        handlerPool.addLoginOrOut(wrapMessage);
     }
 }

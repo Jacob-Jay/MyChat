@@ -1,3 +1,4 @@
+import com.jq.dto.MessageConstant;
 import com.jq.dto.marshaller.MarHead;
 import com.jq.dto.marshaller.MarMessage;
 import com.jq.protocol.marshaller.MarDecoder;
@@ -43,7 +44,6 @@ public class MarTest {
 
         MarMessage message = new MarMessage();
         MarHead head = new MarHead();
-        head.setContactId(120);
 
         Map<String,Object> attachment = new HashMap<>();
         attachment.put("name", "jq");
@@ -51,7 +51,8 @@ public class MarTest {
         T nan = new T("nan", 20);
         attachment.put("T", nan);
         head.setAttachment(attachment);
-
+        head.setAction(MessageConstant.ACTION_LOGIN);
+        head.setAccountNum(123);
         message.setHead(head);
         message.setBody(nan);
         MarEncoder encoder = new MarEncoder();

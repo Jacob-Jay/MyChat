@@ -43,9 +43,11 @@ public class MarDecoder extends LengthFieldBasedFrameDecoder{
         MarHead head = new MarHead();
         head.setVersion(frame.readInt());
         head.setLength(frame.readInt());
-        head.setMessageScope(frame.readInt());
-        head.setContactId(frame.readInt());
-        head.setMessageType(frame.readInt());
+        head.setAction(frame.readInt());
+//        head.setMessageScope(frame.readInt());
+//        head.setContactId(frame.readInt());
+        head.setAccountNum(frame.readInt());
+//        head.setMessageType(frame.readInt());
         int attachSize = frame.readInt();
         if (attachSize != 0) {
             Map<String,Object> attachment = new HashMap<>(attachSize);

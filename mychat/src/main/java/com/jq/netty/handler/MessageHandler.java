@@ -1,6 +1,6 @@
 package com.jq.netty.handler;
 
-import com.jq.netty.TaskNode;
+import com.jq.netty.WrapMessage;
 
 /**
  * @author Jiangqing
@@ -9,5 +9,5 @@ import com.jq.netty.TaskNode;
  */
 public interface MessageHandler {
 
-    void handle(TaskNode taskNode);
+    void handle(WrapMessage taskNode);
 }

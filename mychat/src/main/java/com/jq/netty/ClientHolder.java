@@ -10,7 +10,7 @@ import io.netty.channel.Channel;
  */
 public interface ClientHolder {
 
-    void add(Channel channel) throws ClientRepeatException;
+    void add(WrapMessage  wrapMessage) throws ClientRepeatException;
 
-    void remove(Channel channel);
+    void remove(WrapMessage wrapMessage);
 }

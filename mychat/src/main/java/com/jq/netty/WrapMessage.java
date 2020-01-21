@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class TaskNode {
+public class WrapMessage {
     private ChannelHandlerContext ctx;
     private MarMessage message;
 }

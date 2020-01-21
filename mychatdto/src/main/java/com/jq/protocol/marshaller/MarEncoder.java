@@ -31,15 +31,14 @@ public class MarEncoder extends MessageToByteEncoder<MarMessage>{
     private void encode(MarMessage msg, ByteBuf out) throws Exception {
             MarMessage marMessage = (MarMessage) msg;
             MarHead head = marMessage.getHead();
+            head.check();
             out.writeInt(head.getVersion());
             out.writeBytes(MarHead.LENGTH_CONSTANT);
-            out.writeInt(head.getMessageScope());
-            Integer contactId = head.getContactId();
-            if (null == contactId) {
-                throw new RuntimeException("接收用户或群组id不能未空");
-            }
-            out.writeInt(contactId);
-            out.writeInt(head.getMessageType());
+            out.writeInt(head.getAction());
+//            out.writeInt(head.getMessageScope());
+//            out.writeInt(head.getContactId());
+            out.writeInt(head.getAccountNum());
+//            out.writeInt(head.getMessageType());
             Map<String, Object> attachment = head.getAttachment();
             if (attachment == null || attachment.size() == 0) {
                 out.writeInt(0);
